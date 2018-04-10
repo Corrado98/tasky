@@ -20,31 +20,21 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    private TextField textId;
-    private TextField textTitle;
-    private TextArea textAreaDescription;
-    private DatePicker datePicker;
-    private ComboBox<String> comboTaskState;
-    private Button saveButton;
-    private Button deleteButton;
-
-    private Label labelId;
-    private Label labelTitle;
-    private Label labelDescription;
-    private Label labelDatePicker;
-    private Label labelTaskState;
 
     private VBox todoColumn = new VBox();
     private VBox doingColumn = new VBox();
     private VBox doneColumn = new VBox();
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         BorderPane root = new BorderPane();
         //root.setStyle("-fx-background-color: aquamarine");
-
-
         ScrollPane scrollPane = new ScrollPane(createColumns());
+        scrollPane.setFitToHeight(true);
         root.setCenter(scrollPane);
         root.setRight(createEditor());
         root.setBottom(createActions());
@@ -56,10 +46,64 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    private Node createColumns() {
+        String cornsilk = "-fx-background-color: cornsilk";
+        Insets smallPadding = new Insets(10);
+        layoutColumn(todoColumn, cornsilk, smallPadding);
+        layoutColumn(doingColumn, cornsilk, smallPadding);
+        layoutColumn(doneColumn, cornsilk, smallPadding);
+
+        HBox columns = new HBox(20);
+        columns.setPadding(new Insets(20));
+        columns.getChildren().add(createColumn("Todo", todoColumn));
+        columns.getChildren().add(createColumn("Doing", doingColumn));
+        columns.getChildren().add(createColumn("Done", doneColumn));
+
+        return columns;
+    }
+
+    private void layoutColumn(VBox column, String cornsilk, Insets smallPadding) {
+        column.setStyle(cornsilk);
+        column.setSpacing(10);
+        column.setPadding(smallPadding);
+    }
+
+    private BorderPane createColumn(String label, Node contentColumn) {
+        BorderPane column = new BorderPane();
+        column.setTop(new Label(label));
+        column.setCenter(new ScrollPane(contentColumn));
+        return column;
+    }
+
     private void initTasks() {
         todoColumn.getChildren().add(createTask(0, "Hello"));
         todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "Very long world task for testing"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
+        todoColumn.getChildren().add(createTask(1, "World"));
         doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doingColumn.getChildren().add(createTask(2, "Eric"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
+        doneColumn.getChildren().add(createTask(3, "Private appointment"));
         doneColumn.getChildren().add(createTask(3, "Private appointment"));
 
     }
@@ -72,78 +116,50 @@ public class Main extends Application {
         return task;
     }
 
-    private Node createColumns() {
-        todoColumn.setStyle("-fx-background-color: cornsilk");
-        todoColumn.setSpacing(10);
-        todoColumn.setPadding(new Insets(10));
-
-        doingColumn.setStyle("-fx-background-color: cornsilk");
-        doingColumn.setSpacing(10);
-        doingColumn.setPadding(new Insets(10));
-
-        doneColumn.setStyle("-fx-background-color: cornsilk");
-        doneColumn.setSpacing(10);
-        doneColumn.setPadding(new Insets(10));
-
-        HBox columns = new HBox(20);
-        columns.setPadding(new Insets(20));
-        columns.getChildren().add(createColumn("Todo", todoColumn));
-        columns.getChildren().add(createColumn("Doing", doingColumn));
-        columns.getChildren().add(createColumn("Done", doneColumn));
-        return columns;
-    }
-
-    private BorderPane createColumn(String label, Node contentColumn) {
-        BorderPane column = new BorderPane();
-        column.setTop(new Label(label));
-        column.setCenter(contentColumn);
-        return column;
-    }
-
     private Node createEditor() {
-        textId = new TextField();
-        textTitle = new TextField();
-        textAreaDescription = new TextArea();
-        datePicker = new DatePicker(LocalDate.now());
-        comboTaskState = new ComboBox<>();
-        saveButton = new Button("Save");
-        deleteButton = new Button("Delete");
+        TextField textId = new TextField();
+        TextField textTitle = new TextField();
+        TextArea textAreaDescription = new TextArea();
+        DatePicker datePicker = new DatePicker(LocalDate.now());
+        ComboBox<String> comboTaskState = new ComboBox<>();
+        Button saveButton = new Button("Save");
+        Button deleteButton = new Button("Delete");
 
-        labelId = new Label("ID");
-        labelTitle = new Label("Title");
-
-        int row = 0;
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(20);
         grid.setVgap(10);
-        labelDescription = new Label("Description");
+        Label labelDescription = new Label("Description");
         GridPane.setValignment(labelDescription, VPos.TOP);
 
+        int row = 0;
+        addFormElement("ID", textId, row, grid);
+        row++;
+        addFormElement("Title", textTitle, row, grid);
+        row++;
+        addFormElement(labelDescription, textAreaDescription, row, grid);
+        row++;
+        addFormElement("Date", datePicker, row, grid);
+        row++;
+        addFormElement("State", comboTaskState, row, grid);
+        row++;
 
-        grid.add(labelId, 0, row);
-        grid.add(textId, 1, row);
-        row++;
-        grid.add(labelTitle, 0, row);
-        grid.add(textTitle, 1, row);
-        row++;
-        grid.add(labelDescription, 0, row);
-        grid.add(textAreaDescription, 1, row);
-        row++;
-        grid.add(new Label("Date"), 0, row);
-        grid.add(datePicker, 1, row);
-        row++;
-        grid.add(new Label("State"), 0, row);
-        grid.add(comboTaskState, 1, row);
-        row++;
         HBox buttonGroup = new HBox();
         buttonGroup.getChildren().addAll(saveButton, deleteButton);
         buttonGroup.setSpacing(10);
-
         grid.add(buttonGroup, 0, row, 2, 1);
 
-
         return grid;
+    }
+
+    private void addFormElement(String label, Node element, int row, GridPane grid) {
+        grid.add(new Label(label), 0, row);
+        grid.add(element, 1, row);
+    }
+
+    private void addFormElement(Label label, Node element, int row, GridPane grid) {
+        grid.add(label, 0, row);
+        grid.add(element, 1, row);
     }
 
     private Node createActions() {
@@ -154,9 +170,5 @@ public class Main extends Application {
         actionGroup.setPadding(new Insets(20));
         actionGroup.setSpacing(10);
         return actionGroup;
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
