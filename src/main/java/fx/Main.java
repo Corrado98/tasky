@@ -30,7 +30,7 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
         //root.setStyle("-fx-background-color: aquamarine");
         ScrollPane scrollPane = new ScrollPane(createColumns());
@@ -71,7 +71,10 @@ public class Main extends Application {
     private BorderPane createColumn(String label, Node contentColumn) {
         BorderPane column = new BorderPane();
         column.setTop(new Label(label));
-        column.setCenter(new ScrollPane(contentColumn));
+        ScrollPane scroll = new ScrollPane(contentColumn);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        column.setCenter(scroll);
         return column;
     }
 
