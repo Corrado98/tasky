@@ -1,11 +1,14 @@
 package fx;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -25,6 +28,7 @@ public class Main extends Application {
     private VBox todoColumn = new VBox();
     private VBox doingColumn = new VBox();
     private VBox doneColumn = new VBox();
+    private final List<VBox> columns = Arrays.asList(todoColumn, doingColumn, doneColumn);
 
     public static void main(String[] args) {
         launch(args);
@@ -90,10 +94,6 @@ public class Main extends Application {
             /* data is dragged over the target */
             /* accept it only if it is not dragged from the same node
              * and if it has a string data */
-            System.out.println("source: " + event.getGestureSource()); //hbox card
-            System.out.println("Col: " + contentColumn); //vbox col
-            System.out.println(isCardInColumn(event.getGestureSource(), contentColumn));
-
             if (!isCardInColumn(event.getGestureSource(), contentColumn) && event.getDragboard().hasString()) {
                 /* allow for both copying and moving, whatever user chooses */
                 event.acceptTransferModes(TransferMode.ANY);
@@ -136,18 +136,23 @@ public class Main extends Application {
 
             boolean success = false;
             if (db.hasString()) {
-                System.out.println(event.getSource().getClass()); //vbox
-                System.out.println(event.getGestureSource().getClass()); //card hbox
+                Pane columnFromDragStart = getColumnFromDragStart(((Pane) event.getGestureSource()).getParent());
+                columnFromDragStart.getChildren().remove(event.getGestureSource());
 
                 String[] split = db.getString().split("\\.");
                 contentColumn.getChildren().add(createTask(Integer.parseInt(split[0]), split[1]));
                 success = true;
             }
+
             /* let the source know whether the string was successfully
              * transferred and used */
             event.setDropCompleted(success);
             event.consume();
         });
+    }
+
+    private Pane getColumnFromDragStart(Parent columnFromCard) {
+        return columns.stream().filter(column -> column.equals(columnFromCard)).findFirst().get();
     }
 
     private void initTasks() {
