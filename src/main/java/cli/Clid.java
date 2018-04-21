@@ -1,5 +1,10 @@
+package cli;
+
+import api.IRepository;
+import api.TaskState;
+import impl.InMemoryRepositoryImpl;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -13,7 +18,7 @@ public class Clid {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter command: ");
 
-        Repository repository = new Repository();
+        IRepository repository = new InMemoryRepositoryImpl();
 
         while (scanner.hasNext()) {
             try {
@@ -37,11 +42,11 @@ public class Clid {
 
                         System.out.print("State: ");
                         printTaskstates();
-                        Taskstate state = Taskstate.valueOf(scanner.next().toUpperCase());
+                        TaskState state = TaskState.valueOf(scanner.next().toUpperCase());
 
-                        if (repository.add(title, description, localDate, state)) {
-                            System.out.println(String.format("Added Task[%s] title = %s, desc = %s, dueDate = %s, state = %s", repository.allTasks().size(), title, description, localDateString, state));
-                        }
+//                        if (repository.add(title, description, localDate, state)) {
+//                            System.out.println(String.format("Added api.Task[%s] title = %s, desc = %s, dueDate = %s, state = %s", repository.allTasks().size(), title, description, localDateString, state));
+//                        }
                         break;
                     case READ:
                         break;
@@ -53,10 +58,10 @@ public class Clid {
         }
 
 
-//		Task t = new Task("Hello", "World");
+//		api.Task t = new api.Task("Hello", "World");
 //		repository.add(t);
-//		t.setTaskstate(Taskstate.Doing);
-//		t.setDesc("Second World");
+//		t.setTaskState(api.TaskState.Doing);
+//		t.setDescription("Second World");
 //		repository.remove(t);
     }
 
@@ -65,7 +70,7 @@ public class Clid {
     }
 
     private static void printTaskstates() {
-        Arrays.stream(Taskstate.values()).forEach(state -> System.out.println(state.name().toLowerCase()));
+        Arrays.stream(TaskState.values()).forEach(state -> System.out.println(state.name().toLowerCase()));
     }
 
 }

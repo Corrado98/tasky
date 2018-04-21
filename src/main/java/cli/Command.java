@@ -1,3 +1,5 @@
+package cli;
+
 public enum Command {
     SHOW,
     ADD,
