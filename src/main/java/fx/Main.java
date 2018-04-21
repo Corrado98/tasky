@@ -1,6 +1,7 @@
 package fx;
 
 import java.time.LocalDate;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -13,10 +14,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -68,14 +69,85 @@ public class Main extends Application {
         column.setPadding(smallPadding);
     }
 
-    private BorderPane createColumn(String label, Node contentColumn) {
+    private BorderPane createColumn(String label, Pane contentColumn) {
         BorderPane column = new BorderPane();
         column.setTop(new Label(label));
+
+        addOnDragOver(contentColumn);
+        addOnDragEntered(contentColumn);
+        addOnDragExited(contentColumn);
+        addOnDragDropped(contentColumn);
+
         ScrollPane scroll = new ScrollPane(contentColumn);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         column.setCenter(scroll);
         return column;
+    }
+
+    private void addOnDragOver(Pane contentColumn) {
+        contentColumn.setOnDragOver(event -> {
+            /* data is dragged over the target */
+            /* accept it only if it is not dragged from the same node
+             * and if it has a string data */
+            System.out.println("source: " + event.getGestureSource()); //hbox card
+            System.out.println("Col: " + contentColumn); //vbox col
+            System.out.println(isCardInColumn(event.getGestureSource(), contentColumn));
+
+            if (!isCardInColumn(event.getGestureSource(), contentColumn) && event.getDragboard().hasString()) {
+                /* allow for both copying and moving, whatever user chooses */
+                event.acceptTransferModes(TransferMode.ANY);
+            }
+
+            event.consume();
+        });
+    }
+
+    private boolean isCardInColumn(Object card, Pane column) {
+        return column.getChildren().contains(card);
+    }
+
+    private void addOnDragEntered(Pane contentColumn) {
+        contentColumn.setOnDragEntered(event -> {
+            /* the drag-and-drop gesture entered the target */
+            /* show to the user that it is an actual gesture target */
+            if (!isCardInColumn(event.getGestureSource(), contentColumn) &&
+                    event.getDragboard().hasString()) {
+                String green = "-fx-background-color: green";
+                contentColumn.setStyle(green);
+            }
+
+            event.consume();
+        });
+    }
+
+    private void addOnDragExited(Pane contentColumn) {
+        contentColumn.setOnDragExited(event -> {
+            String cornsilk = "-fx-background-color: cornsilk";
+            contentColumn.setStyle(cornsilk);
+        });
+    }
+
+    private void addOnDragDropped(Pane contentColumn) {
+        contentColumn.setOnDragDropped(event -> {
+            /* data dropped */
+            /* if there is a string data on dragboard, read it and use it */
+            Dragboard db = event.getDragboard();
+
+            boolean success = false;
+            if (db.hasString()) {
+                System.out.println(event.getSource().getClass()); //vbox
+                System.out.println(event.getGestureSource().getClass()); //card hbox
+
+                String[] split = db.getString().split("\\.");
+                contentColumn.getChildren().add(createTask(Integer.parseInt(split[0]), split[1]));
+                success = true;
+            }
+            /* let the source know whether the string was successfully
+             * transferred and used */
+            event.setDropCompleted(success);
+            event.consume();
+        });
     }
 
     private void initTasks() {
@@ -116,7 +188,26 @@ public class Main extends Application {
         task.getChildren().addAll(new Label(String.valueOf(id)), new Label(title));
         task.setStyle("-fx-border-color: black");
         task.setPadding(new Insets(20));
+
+        addOnDragEvent(id, title, task);
+
         return task;
+    }
+
+    private void addOnDragEvent(int id, String title, HBox task) {
+        task.setOnDragDetected(event -> {
+            /* drag was detected, start a drag-and-drop gesture*/
+            /* allow any transfer mode */
+            Dragboard db = task.startDragAndDrop(TransferMode.ANY);
+
+            /* Put a string on a dragboard */
+            ClipboardContent content = new ClipboardContent();
+
+            content.putString(String.format("%s.%s", String.valueOf(id), title));
+            db.setContent(content);
+
+            event.consume();
+        });
     }
 
     private Node createEditor() {
